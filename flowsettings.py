@@ -10,8 +10,31 @@ from theflow.settings.default import *  # noqa
 cur_frame = currentframe()
 if cur_frame is None:
     raise ValueError("Cannot get the current frame.")
-this_file = getframeinfo(cur_frame).filename
-this_dir = Path(this_file).parent
+
+
+def get_docstore_path(cur_frame) -> Path:
+    """Get the path to the docstore directory.
+
+    Note: Fix becasue of the issue with filesystem on windows if running in WSL.
+
+    Returns
+    -------
+    Path
+        The path to the docstore directory.
+    """
+    if (
+        "microsoft-standard" in os.uname().release.lower()
+        or "wsl" in os.uname().release.lower()
+    ):
+        # Running in WSL: Use home directory
+        return Path.home()
+    else:
+        # Not in WSL: Use default path
+        this_file = getframeinfo(cur_frame).filename
+        return Path(this_file).parent
+
+
+this_dir = get_docstore_path(cur_frame)
 
 # change this if your app use a different name
 KH_PACKAGE_NAME = "kotaemon_app"
@@ -247,6 +270,7 @@ KH_EMBEDDINGS["google"] = {
 #     },
 #     "default": False,
 # }
+
 
 # default reranking models
 KH_RERANKINGS["cohere"] = {
