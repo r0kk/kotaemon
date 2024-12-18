@@ -31,7 +31,7 @@ def split_text_by_chunk_size(text: str, chunk_size: int) -> list[list[int]]:
     tokens = iter(encoding.encode(text))
     result = []
     while chunk := list(islice(tokens, chunk_size)):
-        result.append(chunk)
+        result.append(encoding.decode(chunk))
     return result
 
 
