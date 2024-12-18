@@ -31,6 +31,11 @@ class TeiEndpointEmbeddings(BaseEmbeddings):
         True,
         help="Truncate embeddings to a fixed/default length",
     )
+    model_name: str = Param(
+        help=("Just for the information purpose, "),
+        default=None,
+        required=True,
+    )
 
     async def client_(self, inputs: list[str]):
         async with aiohttp.ClientSession() as session:
