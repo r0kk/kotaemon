@@ -1,3 +1,20 @@
+[tool.poetry]
+name = "cortigen"
+version = "0.0.1"
+description = "RAG application for document search."
+authors = ["RK"]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+# kotaemon = { path = "libs/kotaemon", develop = true, extras = ["all"] }
+# ktem = { path = "libs/ktem", develop = true }
+elasticsearch = "^8.17.0"
+
 [build-system]
 requires = ["setuptools >= 61.0", "wheel", "setuptools-git-versioning>=2.0,<3"]
 build-backend = "setuptools.build_meta"
