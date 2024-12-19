@@ -2,22 +2,21 @@ import html
 import json
 import os
 import shutil
-import tempfile
 import zipfile
 from copy import deepcopy
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List, Optional
 
 import gradio as gr
 import pandas as pd
-from gradio.data_classes import FileData
-from gradio.utils import NamedString
-from ktem.app import BasePage
-from ktem.db.engine import engine
-from ktem.utils.render import Render
+from gradio.data_classes import FileData, ListFiles
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from theflow.settings import settings as flowsettings
+
+from ktem.app import BasePage
+from ktem.db.engine import engine
+from ktem.utils.render import Render
 
 DOWNLOAD_MESSAGE = "Press again to download"
 MAX_FILENAME_LENGTH = 20
@@ -49,30 +48,56 @@ function(file_list) {
 """
 
 
+def valid_files(
+    files: List[gr.utils.NamedString],
+):
+    """Validate files and process both valid and invalid files with a warning."""
+    if not files:
+        return "No files uploaded."
+
+    result = []
+    for file in files:
+        file_path = Path(file.name)
+        result.append(f"File: {file_path.name}, Size: {file_path.stat().st_size} bytes")
+
+    return "\n".join(result)
+
+
 class File(gr.File):
-    """Subclass from gr.File to maintain the original filename
+    """Subclass from gr.File to add support for directory upload."""
 
-    The issue happens when user uploads file with name like: !@#$%%^&*().pdf
-    """
+    directory_file_types: Optional[List[str]] = None
 
-    def _process_single_file(self, f: FileData) -> NamedString | bytes:
-        file_name = f.path
-        if self.type == "filepath":
-            if f.orig_name and Path(file_name).name != f.orig_name:
-                file_name = str(Path(file_name).parent / f.orig_name)
-                os.rename(f.path, file_name)
-            file = tempfile.NamedTemporaryFile(delete=False, dir=self.GRADIO_CACHE)
-            file.name = file_name
-            return NamedString(file_name)
-        elif self.type == "binary":
-            with open(file_name, "rb") as file_data:
-                return file_data.read()
-        else:
-            raise ValueError(
-                "Unknown type: "
-                + str(type)
-                + ". Please choose from: 'filepath', 'binary'."
-            )
+    def preprocess(
+        self, payload: ListFiles | FileData | None
+    ) -> bytes | str | list[bytes] | list[str] | None:
+        """
+        Parameters:
+            payload: File information as a FileData object, or a list of FileData objects.
+        Returns:
+            Passes the file as a `str` or `bytes` object, or a list of `str` or list of `bytes` objects, depending on `type` and `file_count`.
+        """
+        if payload is None:
+            return None
+
+        if self.file_count == "single":
+            if isinstance(payload, ListFiles):
+                return self._process_single_file(payload[0])
+            return self._process_single_file(payload)
+        if isinstance(payload, ListFiles):
+            if self.directory_file_types is not None:
+                result = []
+                for f in payload:
+                    file = Path(f.path)
+                    if (
+                        file.suffix in self.directory_file_types
+                        and not file.name.startswith("~$")
+                    ):
+                        result.append(self._process_single_file(f))
+            else:
+                result = [self._process_single_file(f) for f in payload]
+            return result  # type: ignore
+        return [self._process_single_file(payload)]  # type: ignore
 
 
 class DirectoryUpload(BasePage):
@@ -161,7 +186,6 @@ class FileIndexPage(BasePage):
         )
 
         with gr.Row():
-
             self.chat_button = gr.Button(
                 "Go to Chat",
                 visible=False,
@@ -262,10 +286,16 @@ class FileIndexPage(BasePage):
                 with gr.Column() as self.upload:
                     with gr.Tab("Upload Files"):
                         self.files = File(
-                            file_types=self._supported_file_types,
-                            file_count="multiple",
+                            file_count="directory",
+                            label="Upload a folder",
                             container=True,
-                            show_label=False,
+                        )
+                        self.files.directory_file_types = self._supported_file_types
+                        output = gr.Textbox()
+                        self.files.change(
+                            valid_files,
+                            inputs=self.files,
+                            outputs=output,
                         )
 
                         msg = self.upload_instruction()
