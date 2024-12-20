@@ -113,10 +113,13 @@ KH_DOCSTORE = {
 }
 KH_VECTORSTORE = {
     # "__type__": "kotaemon.storages.LanceDBVectorStore",
-    "__type__": "kotaemon.storages.ChromaVectorStore",
+    # "__type__": "kotaemon.storages.ChromaVectorStore",
+    # "path": str(KH_USER_DATA_DIR / "vectorstore"),
     # "__type__": "kotaemon.storages.MilvusVectorStore",
-    # "__type__": "kotaemon.storages.QdrantVectorStore",
-    "path": str(KH_USER_DATA_DIR / "vectorstore"),
+    "__type__": "kotaemon.storages.QdrantVectorStore",
+    "url": "http://localhost:6333",
+    "api_key": "test1234'",
+    "client_kwargs": {},  # Additional options to pass to qdrant_client.QdrantClient
 }
 KH_LLMS = {}
 KH_EMBEDDINGS = {}
