@@ -92,7 +92,12 @@ class TeiEndpointEmbeddings(BaseEmbeddings):
                 mini_batch = text[batch_size * i :]
             else:
                 mini_batch = text[batch_size * i : batch_size * (i + 1)]
-            mini_batch = [x.content for x in mini_batch]
+            mini_batch = [x.content for x in mini_batch if x.content.strip()]
+
+            if not mini_batch:
+                # Skip empty batches
+                continue
+
             embeddings = session.post(
                 url=self.endpoint_url,
                 json={
