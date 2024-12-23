@@ -107,9 +107,12 @@ KH_FILESTORAGE_PATH = str(KH_USER_DATA_DIR / "files")
 
 KH_DOCSTORE = {
     # "__type__": "kotaemon.storages.ElasticsearchDocumentStore",
+    # "elasticsearch_url": "http://localhost:9200",
+    # "api_key": "",
     # "__type__": "kotaemon.storages.SimpleFileDocumentStore",
     "__type__": "kotaemon.storages.LanceDBDocumentStore",
     "path": str(KH_USER_DATA_DIR / "docstore"),
+    "collection_name": "docstore",
 }
 KH_VECTORSTORE = {
     # "__type__": "kotaemon.storages.LanceDBVectorStore",

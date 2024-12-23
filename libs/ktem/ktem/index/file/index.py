@@ -384,7 +384,7 @@ class FileIndex(BaseIndex):
             },
             "max_file_size": {
                 "name": "Max file size (MB)",
-                "value": 100,
+                "value": 1000,
                 "component": "number",
                 "info": "The maximum size of file. Set 0 to disable.",
             },
