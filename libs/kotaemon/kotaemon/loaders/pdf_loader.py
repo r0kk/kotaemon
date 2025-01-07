@@ -1,4 +1,5 @@
 import base64
+from concurrent.futures import ProcessPoolExecutor, TimeoutError
 from io import BytesIO
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -22,7 +23,6 @@ def get_page_thumbnails(
     Returns:
         list[Image.Image]: list of page thumbnails
     """
-
     img: Image.Image
     suffix = file_path.suffix.lower()
     assert suffix == ".pdf", "This function only supports PDF files."
@@ -53,23 +53,63 @@ def convert_image_to_base64(img: Image.Image) -> str:
     return img_base64
 
 
+def load_pdf_data(
+    file: Path, extra_info: Optional[Dict], fs: Optional[AbstractFileSystem]
+) -> List[Document]:
+    reader = PDFReader(return_full_document=False)
+    return reader.load_data(file, extra_info, fs)
+
+
 class PDFThumbnailReader(PDFReader):
     """PDF parser with thumbnail for each page."""
-
-    def __init__(self) -> None:
-        """
-        Initialize PDFReader.
-        """
-        super().__init__(return_full_document=False)
 
     def load_data(
         self,
         file: Path,
         extra_info: Optional[Dict] = None,
         fs: Optional[AbstractFileSystem] = None,
+        timeout: Optional[float] = 300.0,
     ) -> List[Document]:
-        """Parse file."""
-        documents = super().load_data(file, extra_info, fs)
+        """Parse file.
+
+        Parameters
+        ----------
+        file : Path
+            Path to the file to be parsed.
+        extra_info : Optional[Dict], optional
+            Extra information to be added to the document metadata, by default None
+        fs : Optional[AbstractFileSystem], optional
+            Filesystem to use, by default None
+        timeout : Optional[float], optional
+            Timeout for the process, by default 300.0.
+
+        Returns
+        -------
+        List[Document]
+            List of documents.
+
+        Raises
+        ------
+        TimeoutError
+            If the process takes too long to complete.
+
+        """
+        with ProcessPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(load_pdf_data, file, extra_info, fs)
+            process = None
+
+            # Retrieve the underlying process
+            for pid, p in executor._processes.items():
+                process = p
+                break
+
+            try:
+                documents = future.result(timeout=timeout)
+            except TimeoutError as e:
+                if process:
+                    process.terminate()
+                    process.join()
+                raise e
 
         page_numbers_str = []
         filtered_docs = []
