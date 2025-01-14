@@ -114,13 +114,14 @@ KH_DOCSTORE = {
     "path": str(KH_USER_DATA_DIR / "docstore"),
     "collection_name": "docstore",
 }
+
 KH_VECTORSTORE = {
     # "__type__": "kotaemon.storages.LanceDBVectorStore",
     # "__type__": "kotaemon.storages.ChromaVectorStore",
     # "path": str(KH_USER_DATA_DIR / "vectorstore"),
     # "__type__": "kotaemon.storages.MilvusVectorStore",
     "__type__": "kotaemon.storages.QdrantVectorStore",
-    "url": "http://localhost:6333",
+    "url": config("QDRANT_URL"),
     "api_key": "test1234'",
     "client_kwargs": {},  # Additional options to pass to qdrant_client.QdrantClient
 }
