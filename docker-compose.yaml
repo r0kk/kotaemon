@@ -10,6 +10,7 @@ services:
       - GRADIO_SERVER_PORT=7860
     ports:
       - '7860:7860'
+    volumes:
+      - ./data/ktem_app_data:/root/ktem_app_data
     platform: linux/amd64
-
     restart: unless-stopped
