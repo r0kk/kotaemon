@@ -106,12 +106,13 @@ KH_DATABASE = f"sqlite:///{KH_USER_DATA_DIR / 'sql.db'}"
 KH_FILESTORAGE_PATH = str(KH_USER_DATA_DIR / "files")
 
 KH_DOCSTORE = {
-    # "__type__": "kotaemon.storages.ElasticsearchDocumentStore",
-    # "elasticsearch_url": "http://localhost:9200",
+    "__type__": "kotaemon.storages.ElasticsearchDocumentStore",
+    "elasticsearch_url": config("ELASTIC_URL"),
+    "basic_auth": (config("ELASTIC_USERNAME"), config("ELASTIC_PASSWORD")),
     # "api_key": "",
     # "__type__": "kotaemon.storages.SimpleFileDocumentStore",
-    "__type__": "kotaemon.storages.LanceDBDocumentStore",
-    "path": str(KH_USER_DATA_DIR / "docstore"),
+    # "__type__": "kotaemon.storages.LanceDBDocumentStore",
+    # "path": str(KH_USER_DATA_DIR / "docstore"),
     "collection_name": "docstore",
 }
 
@@ -197,25 +198,25 @@ if config("LOCAL_MODEL", default=""):
             "base_url": KH_OLLAMA_URL,
             "model": config("LOCAL_MODEL", default="llama3.1:8b"),
             "api_key": "ollama",
+            "max_retries": 4,
+            "max_tokens": 8129,
+        },
+        "default": True,
+    }
+    KH_EMBEDDINGS["hugging_embedd"] = {
+        "spec": {
+            "__type__": "kotaemon.embeddings.TeiEndpointEmbeddings",
+            "endpoint_url": config("KH_HUGGING_EMBEDD_URL"),
+            "model_name": config("LOCAL_MODEL_EMBEDDINGS"),
         },
         "default": False,
     }
-    KH_EMBEDDINGS["ollama"] = {
+    KH_RERANKINGS["hugging_rerank"] = {
         "spec": {
-            "__type__": "kotaemon.embeddings.OpenAIEmbeddings",
-            "base_url": KH_OLLAMA_URL,
-            "model": config("LOCAL_MODEL_EMBEDDINGS", default="nomic-embed-text"),
-            "api_key": "ollama",
+            "__type__": "kotaemon.rerankings.TeiFastReranking",
+            "endpoint_url": config("KH_HUGGING_RERANK_URL"),
         },
-        "default": False,
-    }
-
-    KH_EMBEDDINGS["fast_embed"] = {
-        "spec": {
-            "__type__": "kotaemon.embeddings.FastEmbedEmbeddings",
-            "model_name": "BAAI/bge-base-en-v1.5",
-        },
-        "default": False,
+        "default": True,
     }
 
 # additional LLM configurations
@@ -321,7 +322,7 @@ SETTINGS_REASONING = {
     },
     "max_context_length": {
         "name": "Max context length (LLM)",
-        "value": 32000,
+        "value": 8192,
         "component": "number",
     },
 }
