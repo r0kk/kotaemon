@@ -408,7 +408,7 @@ class FullQAPipeline(BaseReasoning):
             },
             "highlight_citation": {
                 "name": "Citation style",
-                "value": "highlight",
+                "value": "inline",
                 "component": "radio",
                 "choices": [
                     ("highlight (verbose)", "highlight"),
