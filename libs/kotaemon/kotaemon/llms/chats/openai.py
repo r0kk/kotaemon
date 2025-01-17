@@ -282,11 +282,13 @@ class ChatOpenAI(BaseChatOpenAI):
             "max_retries": self.max_retries_,
         }
         if async_version:
-            from openai import AsyncOpenAI
+            # from openai import AsyncOpenAI
+            from langfuse.openai import AsyncOpenAI
 
             return AsyncOpenAI(**params)
 
-        from openai import OpenAI
+        # from openai import OpenAI
+        from langfuse.openai import OpenAI
 
         return OpenAI(**params)
 
@@ -353,11 +355,13 @@ class AzureChatOpenAI(BaseChatOpenAI):
             "max_retries": self.max_retries_,
         }
         if async_version:
-            from openai import AsyncAzureOpenAI
+            # from openai import AsyncAzureOpenAI
+            from langfuse.openai import AsyncAzureOpenAI
 
             return AsyncAzureOpenAI(**params)
 
-        from openai import AzureOpenAI
+        # from openai import AzureOpenAI
+        from langfuse.openai import AzureOpenAI
 
         return AzureOpenAI(**params)
 

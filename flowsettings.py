@@ -175,7 +175,7 @@ if config("OPENAI_API_KEY", default=""):
             "model": config("OPENAI_CHAT_MODEL", default="gpt-3.5-turbo"),
             "timeout": 20,
         },
-        "default": True,
+        "default": False,
     }
     KH_EMBEDDINGS["openai"] = {
         "spec": {
@@ -188,7 +188,7 @@ if config("OPENAI_API_KEY", default=""):
             "timeout": 10,
             "context_length": 8191,
         },
-        "default": True,
+        "default": False,
     }
 
 if config("LOCAL_MODEL", default=""):
@@ -209,12 +209,13 @@ if config("LOCAL_MODEL", default=""):
             "endpoint_url": config("KH_HUGGING_EMBEDD_URL"),
             "model_name": config("LOCAL_MODEL_EMBEDDINGS"),
         },
-        "default": False,
+        "default": True,
     }
     KH_RERANKINGS["hugging_rerank"] = {
         "spec": {
             "__type__": "kotaemon.rerankings.TeiFastReranking",
             "endpoint_url": config("KH_HUGGING_RERANK_URL"),
+            "max_tokens": 512,
         },
         "default": True,
     }
@@ -287,7 +288,7 @@ KH_RERANKINGS["cohere"] = {
         "model_name": "rerank-multilingual-v2.0",
         "cohere_api_key": config("COHERE_API_KEY", default=""),
     },
-    "default": True,
+    "default": False,
 }
 
 KH_REASONINGS = [

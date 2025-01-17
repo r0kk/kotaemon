@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cortigen"
+name = "koteamon-rag"
 version = "0.0.1"
 description = "RAG application for document search."
 authors = ["RK"]

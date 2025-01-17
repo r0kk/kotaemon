@@ -14,3 +14,9 @@ services:
       - ./data/ktem_app_data:/root/ktem_app_data
     platform: linux/amd64
     restart: unless-stopped
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    external: true
