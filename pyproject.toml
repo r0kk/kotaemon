@@ -17,6 +17,7 @@ elasticsearch = "^8.17.0"
 lancedb = "^0.17.0"
 tantivy = "^0.22.0"
 numpy = "<2.0"
+lightrag = "^0.1.0b6"
 
 [build-system]
 requires = ["setuptools >= 61.0", "wheel", "setuptools-git-versioning>=2.0,<3"]

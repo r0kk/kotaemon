@@ -5,13 +5,15 @@ services:
       dockerfile: Dockerfile
     image: koteamon:v.0.9.8
     container_name: koteamon
+    env_file:
+      - .env
     environment:
       - GRADIO_SERVER_NAME=0.0.0.0
       - GRADIO_SERVER_PORT=7860
     ports:
       - '7860:7860'
     volumes:
-      - ./data/ktem_app_data:/root/ktem_app_data
+      - ./data/ktem_app_data:/app/ktem_app_data
     platform: linux/amd64
     restart: unless-stopped
     networks:

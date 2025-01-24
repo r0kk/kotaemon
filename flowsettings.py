@@ -8,33 +8,11 @@ from ktem.utils.lang import SUPPORTED_LANGUAGE_MAP
 from theflow.settings.default import *  # noqa
 
 cur_frame = currentframe()
+cur_frame = currentframe()
 if cur_frame is None:
     raise ValueError("Cannot get the current frame.")
-
-
-def get_docstore_path(cur_frame) -> Path:
-    """Get the path to the docstore directory.
-
-    Note: Fix becasue of the issue with filesystem on windows if running in WSL.
-
-    Returns
-    -------
-    Path
-        The path to the docstore directory.
-    """
-    if (
-        "microsoft-standard" in os.uname().release.lower()
-        or "wsl" in os.uname().release.lower()
-    ):
-        # Running in WSL: Use home directory
-        return Path.home()
-    else:
-        # Not in WSL: Use default path
-        this_file = getframeinfo(cur_frame).filename
-        return Path(this_file).parent
-
-
-this_dir = get_docstore_path(cur_frame)
+this_file = getframeinfo(cur_frame).filename
+this_dir = Path(this_file).parent
 
 # change this if your app use a different name
 KH_PACKAGE_NAME = "kotaemon_app"
@@ -117,7 +95,7 @@ KH_DOCSTORE = {
 }
 
 KH_VECTORSTORE = {
-    # "__type__": "kotaemon.storages.LanceDBVectorStore",
+    # # "__type__": "kotaemon.storages.LanceDBVectorStore",
     # "__type__": "kotaemon.storages.ChromaVectorStore",
     # "path": str(KH_USER_DATA_DIR / "vectorstore"),
     # "__type__": "kotaemon.storages.MilvusVectorStore",
@@ -373,3 +351,12 @@ KH_INDICES = [
     },
     *GRAPHRAG_INDICES,
 ]
+
+# File index pipeline settings
+
+FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE = int(
+    config("FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=512, cast=int)
+)
+FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP = config(
+    "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=0, cast=int
+)
