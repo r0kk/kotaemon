@@ -8,33 +8,11 @@ from ktem.utils.lang import SUPPORTED_LANGUAGE_MAP
 from theflow.settings.default import *  # noqa
 
 cur_frame = currentframe()
+cur_frame = currentframe()
 if cur_frame is None:
     raise ValueError("Cannot get the current frame.")
-
-
-def get_docstore_path(cur_frame) -> Path:
-    """Get the path to the docstore directory.
-
-    Note: Fix becasue of the issue with filesystem on windows if running in WSL.
-
-    Returns
-    -------
-    Path
-        The path to the docstore directory.
-    """
-    if (
-        "microsoft-standard" in os.uname().release.lower()
-        or "wsl" in os.uname().release.lower()
-    ):
-        # Running in WSL: Use home directory
-        return Path.home()
-    else:
-        # Not in WSL: Use default path
-        this_file = getframeinfo(cur_frame).filename
-        return Path(this_file).parent
-
-
-this_dir = get_docstore_path(cur_frame)
+this_file = getframeinfo(cur_frame).filename
+this_dir = Path(this_file).parent
 
 # change this if your app use a different name
 KH_PACKAGE_NAME = "kotaemon_app"
@@ -106,17 +84,18 @@ KH_DATABASE = f"sqlite:///{KH_USER_DATA_DIR / 'sql.db'}"
 KH_FILESTORAGE_PATH = str(KH_USER_DATA_DIR / "files")
 
 KH_DOCSTORE = {
-    # "__type__": "kotaemon.storages.ElasticsearchDocumentStore",
-    # "elasticsearch_url": "http://localhost:9200",
+    "__type__": "kotaemon.storages.ElasticsearchDocumentStore",
+    "elasticsearch_url": config("ELASTIC_URL"),
+    "basic_auth": (config("ELASTIC_USERNAME"), config("ELASTIC_PASSWORD")),
     # "api_key": "",
     # "__type__": "kotaemon.storages.SimpleFileDocumentStore",
-    "__type__": "kotaemon.storages.LanceDBDocumentStore",
-    "path": str(KH_USER_DATA_DIR / "docstore"),
+    # "__type__": "kotaemon.storages.LanceDBDocumentStore",
+    # "path": str(KH_USER_DATA_DIR / "docstore"),
     "collection_name": "docstore",
 }
 
 KH_VECTORSTORE = {
-    # "__type__": "kotaemon.storages.LanceDBVectorStore",
+    # # "__type__": "kotaemon.storages.LanceDBVectorStore",
     # "__type__": "kotaemon.storages.ChromaVectorStore",
     # "path": str(KH_USER_DATA_DIR / "vectorstore"),
     # "__type__": "kotaemon.storages.MilvusVectorStore",
@@ -174,7 +153,7 @@ if config("OPENAI_API_KEY", default=""):
             "model": config("OPENAI_CHAT_MODEL", default="gpt-3.5-turbo"),
             "timeout": 20,
         },
-        "default": True,
+        "default": False,
     }
     KH_EMBEDDINGS["openai"] = {
         "spec": {
@@ -187,7 +166,7 @@ if config("OPENAI_API_KEY", default=""):
             "timeout": 10,
             "context_length": 8191,
         },
-        "default": True,
+        "default": False,
     }
 
 if config("LOCAL_MODEL", default=""):
@@ -197,25 +176,26 @@ if config("LOCAL_MODEL", default=""):
             "base_url": KH_OLLAMA_URL,
             "model": config("LOCAL_MODEL", default="llama3.1:8b"),
             "api_key": "ollama",
+            "max_retries": 4,
+            "max_tokens": 8129,
         },
-        "default": False,
+        "default": True,
     }
-    KH_EMBEDDINGS["ollama"] = {
+    KH_EMBEDDINGS["hugging_embedd"] = {
         "spec": {
-            "__type__": "kotaemon.embeddings.OpenAIEmbeddings",
-            "base_url": KH_OLLAMA_URL,
-            "model": config("LOCAL_MODEL_EMBEDDINGS", default="nomic-embed-text"),
-            "api_key": "ollama",
+            "__type__": "kotaemon.embeddings.TeiEndpointEmbeddings",
+            "endpoint_url": config("KH_HUGGING_EMBEDD_URL"),
+            "model_name": config("LOCAL_MODEL_EMBEDDINGS"),
         },
-        "default": False,
+        "default": True,
     }
-
-    KH_EMBEDDINGS["fast_embed"] = {
+    KH_RERANKINGS["hugging_rerank"] = {
         "spec": {
-            "__type__": "kotaemon.embeddings.FastEmbedEmbeddings",
-            "model_name": "BAAI/bge-base-en-v1.5",
+            "__type__": "kotaemon.rerankings.TeiFastReranking",
+            "endpoint_url": config("KH_HUGGING_RERANK_URL"),
+            "max_tokens": 512,
         },
-        "default": False,
+        "default": True,
     }
 
 # additional LLM configurations
@@ -286,7 +266,7 @@ KH_RERANKINGS["cohere"] = {
         "model_name": "rerank-multilingual-v2.0",
         "cohere_api_key": config("COHERE_API_KEY", default=""),
     },
-    "default": True,
+    "default": False,
 }
 
 KH_REASONINGS = [
@@ -321,7 +301,7 @@ SETTINGS_REASONING = {
     },
     "max_context_length": {
         "name": "Max context length (LLM)",
-        "value": 32000,
+        "value": 8192,
         "component": "number",
     },
 }
@@ -371,3 +351,12 @@ KH_INDICES = [
     },
     *GRAPHRAG_INDICES,
 ]
+
+# File index pipeline settings
+
+FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE = int(
+    config("FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=512, cast=int)
+)
+FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP = config(
+    "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=0, cast=int
+)
