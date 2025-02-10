@@ -9,8 +9,11 @@ developers in mind.
 
 <a href="https://trendshift.io/repositories/11607" target="_blank"><img src="https://trendshift.io/api/badge/repositories/11607" alt="Cinnamon%2Fkotaemon | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
-[Live Demo](https://huggingface.co/spaces/cin-model/kotaemon-demo) |
+[Live Demo #1](https://huggingface.co/spaces/cin-model/kotaemon) |
+[Live Demo #2](https://huggingface.co/spaces/cin-model/kotaemon-demo) |
 [Online Install](https://cinnamon.github.io/kotaemon/online_install/) |
+[Colab Notebook (Local RAG)](https://colab.research.google.com/drive/1eTfieec_UOowNizTJA1NjawBJH9y_1nn)
+
 [User Guide](https://cinnamon.github.io/kotaemon/) |
 [Developer Guide](https://cinnamon.github.io/kotaemon/development/) |
 [Feedback](https://github.com/Cinnamon/kotaemon/issues) |
@@ -93,17 +96,7 @@ documents and developers who want to build their own RAG pipeline.
 
 ### With Docker (recommended)
 
-1. We support both `lite` & `full` version of Docker images. With `full`, the extra packages of `unstructured` will be installed as well, it can support additional file types (`.doc`, `.docx`, ...) but the cost is larger docker image size. For most users, the `lite` image should work well in most cases.
-
-   - To use the `lite` version.
-
-     ```bash
-     docker run \
-     -e GRADIO_SERVER_NAME=0.0.0.0 \
-     -e GRADIO_SERVER_PORT=7860 \
-     -p 7860:7860 -it --rm \
-     ghcr.io/cinnamon/kotaemon:main-lite
-     ```
+1. We support both `lite` & `full` version of Docker images. With `full` version, the extra packages of `unstructured` will be installed, which can support additional file types (`.doc`, `.docx`, ...) but the cost is larger docker image size. For most users, the `lite` image should work well in most cases.
 
    - To use the `full` version.
 
@@ -111,9 +104,24 @@ documents and developers who want to build their own RAG pipeline.
      docker run \
      -e GRADIO_SERVER_NAME=0.0.0.0 \
      -e GRADIO_SERVER_PORT=7860 \
+     -v ./ktem_app_data:/app/ktem_app_data \
      -p 7860:7860 -it --rm \
      ghcr.io/cinnamon/kotaemon:main-full
      ```
+
+   - To use the `full` version with bundled **Ollama** for _local / private RAG_.
+
+     ```bash
+     # change image name to
+     docker run <...> ghcr.io/cinnamon/kotaemon:main-ollama
+     ```
+
+   - To use the `lite` version.
+
+   ```bash
+    # change image name to
+    docker run <...> ghcr.io/cinnamon/kotaemon:main-lite
+   ```
 
 2. We currently support and test two platforms: `linux/amd64` and `linux/arm64` (for newer Mac). You can specify the platform by passing `--platform` in the `docker run` command. For example:
 
@@ -122,6 +130,7 @@ documents and developers who want to build their own RAG pipeline.
    docker run \
    -e GRADIO_SERVER_NAME=0.0.0.0 \
    -e GRADIO_SERVER_PORT=7860 \
+   -v ./ktem_app_data:/app/ktem_app_data \
    -p 7860:7860 -it --rm \
    --platform linux/arm64 \
    ghcr.io/cinnamon/kotaemon:main-lite
@@ -252,7 +261,7 @@ This file contains the configuration of your application. You can use the exampl
 KH_DOCSTORE=(Elasticsearch | LanceDB | SimpleFileDocumentStore)
 
 # setup your preferred vectorstore (for vector-based search)
-KH_VECTORSTORE=(ChromaDB | LanceDB | InMemory | Qdrant)
+KH_VECTORSTORE=(ChromaDB | LanceDB | InMemory | Milvus | Qdrant)
 
 # Enable / disable multimodal QA
 KH_REASONINGS_USE_MULTIMODAL=True

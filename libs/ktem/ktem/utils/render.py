@@ -5,7 +5,7 @@ from fast_langdetect import detect
 
 from kotaemon.base import RetrievedDocument
 
-BASE_PATH = os.environ.get("GRADIO_ROOT_PATH", "")
+BASE_PATH = os.environ.get("GR_FILE_ROOT_PATH", "")
 
 
 def is_close(val1, val2, tolerance=1e-9):
@@ -44,7 +44,8 @@ class Render:
         o = " open" if open else ""
         return (
             f"<details class='evidence' {o}><summary>"
-            f"{header}</summary>{content}</details><br>"
+            f"{header}</summary>{content}"
+            "</details><br>"
         )
 
     @staticmethod
@@ -58,6 +59,17 @@ class Render:
                 "markdown.extensions.fenced_code",
             ],
         )
+
+    @staticmethod
+    def table_preserve_linebreaks(text: str) -> str:
+        """Render table from markdown format into HTML"""
+        return markdown.markdown(
+            text,
+            extensions=[
+                "markdown.extensions.tables",
+                "markdown.extensions.fenced_code",
+            ],
+        ).replace("\n", "<br>")
 
     @staticmethod
     def preview(
@@ -134,6 +146,8 @@ class Render:
         header = f"<i>{get_header(doc)}</i>"
         if doc.metadata.get("type", "") == "image":
             doc_content = Render.image(url=doc.metadata["image_origin"], text=doc.text)
+        elif doc.metadata.get("type", "") == "table_raw":
+            doc_content = Render.table_preserve_linebreaks(doc.text)
         else:
             doc_content = Render.table(doc.text)
 
@@ -174,6 +188,9 @@ class Render:
         if item_type_prefix:
             item_type_prefix += " from "
 
+        if "raw" in item_type_prefix:
+            item_type_prefix = ""
+
         if llm_reranking_score > 0:
             relevant_score = llm_reranking_score
         elif reranking_score > 0:
@@ -198,6 +215,8 @@ class Render:
                 url=doc.metadata["image_origin"],
                 text=text,
             )
+        elif doc.metadata.get("type", "") == "table_raw":
+            rendered_doc_content = Render.table_preserve_linebreaks(doc.text)
         else:
             rendered_doc_content = Render.table(text)
 
@@ -206,6 +225,9 @@ class Render:
             f" [score: {llm_reranking_score}]",
             doc,
             highlight_text=highlight_text,
+        )
+        rendered_doc_content = (
+            f"<div class='evidence-content'>{rendered_doc_content}</div>"
         )
 
         return Render.collapsible(
