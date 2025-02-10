@@ -372,7 +372,7 @@ class ChatPage(BasePage):
                             label="Mindmap (on)",
                             container=False,
                             elem_id="use-mindmap-checkbox",
-                            value=True,
+                            value=False,
                         )
 
             with gr.Column(

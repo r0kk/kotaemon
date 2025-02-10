@@ -203,7 +203,6 @@ if config("LOCAL_MODEL", default=""):
         "default": False,
     }
 
-    KH_EMBEDDINGS["ollama"] = {
     KH_EMBEDDINGS["hugging_embedd"] = {
         "spec": {
             "__type__": "kotaemon.embeddings.TeiEndpointEmbeddings",
@@ -385,5 +384,5 @@ FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE = int(
     config("FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=512, cast=int)
 )
 FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP = config(
-    "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=0, cast=int
+    "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP", default=0, cast=int
 )
