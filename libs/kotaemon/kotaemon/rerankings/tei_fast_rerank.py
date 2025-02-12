@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
+import nltk
 import requests
 
 from kotaemon.base import Document, Param
@@ -38,15 +40,18 @@ class TeiFastReranking(BaseReranking):
     )
 
     def client(self, query, texts):
-        if self.is_truncated:
-            max_tokens = self.max_tokens  # default is 512 tokens.
-            truncated_texts = [text[:max_tokens] for text in texts]
+        if self.is_truncated and any(
+            True for text in texts if len(nltk.word_tokenize(text)) > self.max_tokens
+        ):
+            logging.warning(
+                "The input text is longer than the maximum number of tokens supported by the reranker model."
+            )
 
         response = session.post(
             url=self.endpoint_url,
             json={
                 "query": query,
-                "texts": truncated_texts,
+                "texts": texts,
                 "is_truncated": self.is_truncated,  # default is True
             },
         ).json()
