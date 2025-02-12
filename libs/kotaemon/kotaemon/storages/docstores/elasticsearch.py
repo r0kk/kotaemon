@@ -13,7 +13,7 @@ class ElasticsearchDocumentStore(BaseDocumentStore):
     def __init__(
         self,
         collection_name: str = "docstore",
-        elasticsearch_url: str = "http://localhost:9200",
+        elasticsearch_url: Union[List[str], str] = "http://localhost:9200",
         k1: float = 2.0,
         b: float = 0.75,
         **kwargs,

@@ -92,13 +92,13 @@ KH_WEB_SEARCH_BACKEND = (
 
 KH_DOCSTORE = {
     "__type__": "kotaemon.storages.ElasticsearchDocumentStore",
-    "elasticsearch_url": config("ELASTIC_URL"),
+    "elasticsearch_url": [config("ELASTIC_URL")],
     "basic_auth": (config("ELASTIC_USERNAME"), config("ELASTIC_PASSWORD")),
     # "api_key": "",
     # "__type__": "kotaemon.storages.SimpleFileDocumentStore",
     # "__type__": "kotaemon.storages.LanceDBDocumentStore",
     # "path": str(KH_USER_DATA_DIR / "docstore"),
-    "collection_name": "docstore",
+    # "collection_name": "docstore",
 }
 
 KH_VECTORSTORE = {
@@ -108,7 +108,7 @@ KH_VECTORSTORE = {
     # "__type__": "kotaemon.storages.MilvusVectorStore",
     "__type__": "kotaemon.storages.QdrantVectorStore",
     "url": config("QDRANT_URL"),
-    "api_key": "test1234'",
+    "api_key": config("QUADRANT_API_KEY"),
     "client_kwargs": {},  # Additional options to pass to qdrant_client.QdrantClient
 }
 KH_LLMS = {}
@@ -189,7 +189,8 @@ if config("LOCAL_MODEL", default=""):
             "model": config("LOCAL_MODEL", default="qwen2.5:7b"),
             "api_key": "ollama",
             "max_retries": 4,
-            "max_tokens": 8129,
+            "max_tokens": config("LOCAL_MODEL_CONTEXT"),
+            "timeout": 10,
         },
         "default": True,
     }
@@ -206,16 +207,19 @@ if config("LOCAL_MODEL", default=""):
     KH_EMBEDDINGS["hugging_embedd"] = {
         "spec": {
             "__type__": "kotaemon.embeddings.TeiEndpointEmbeddings",
-            "endpoint_url": config("KH_HUGGING_EMBEDD_URL"),
             "model_name": config("LOCAL_MODEL_EMBEDDINGS"),
+            "endpoint_url": config("KH_HUGGING_EMBEDD_URL"),
+            "truncate": True,
         },
         "default": True,
     }
     KH_RERANKINGS["hugging_rerank"] = {
         "spec": {
             "__type__": "kotaemon.rerankings.TeiFastReranking",
+            "model_name": config("KH_HUGGING_RERANK"),
+            "max_tokens": config("KH_HUGGING_RERANK_CONTEX"),
             "endpoint_url": config("KH_HUGGING_RERANK_URL"),
-            "max_tokens": 512,
+            "is_truncated": True,
         },
         "default": True,
     }
@@ -384,5 +388,5 @@ FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE = int(
     config("FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=512, cast=int)
 )
 FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP = config(
-    "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP", default=0, cast=int
+    "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP", default=256, cast=int
 )

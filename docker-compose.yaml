@@ -2,7 +2,7 @@ services:
   koteamon:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     image: koteamon:v.0.10.1
     container_name: koteamon
     env_file:
