@@ -32,7 +32,7 @@ class TeiEndpointEmbeddings(BaseEmbeddings):
         help="Truncate embeddings to a fixed/default length",
     )
     model_name: str = Param(
-        help=("Just for the information purpose, "),
+        help=("Just for the information purpose"),
         default=None,
         required=True,
     )
