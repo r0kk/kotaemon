@@ -1,9 +1,9 @@
 services:
   koteamon:
     build:
-      context: .
       dockerfile: Dockerfile
-    image: koteamon:v.0.10.1
+      target: full
+    image: koteamon:v.0.10.2
     container_name: koteamon
     env_file:
       - .env
@@ -13,7 +13,7 @@ services:
     ports:
       - '7860:7860'
     volumes:
-      - ./data/ktem_app_data:/app/ktem_app_data
+      - ./ktem_app_data:/app/ktem_app_data
     platform: linux/amd64
     restart: unless-stopped
     networks:

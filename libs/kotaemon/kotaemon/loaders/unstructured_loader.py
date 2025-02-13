@@ -13,8 +13,16 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from llama_index.core.readers.base import BaseReader
+import nltk
 
 from kotaemon.base import Document
+
+
+def ensure_nltk_resource(resource_name):
+    try:
+        nltk.data.find(f'taggers/{resource_name}')
+    except LookupError:
+        nltk.download(resource_name, quiet=True)
 
 
 class UnstructuredReader(BaseReader):
@@ -68,6 +76,9 @@ class UnstructuredReader(BaseReader):
         else:
             """Parse file locally"""
             from unstructured.partition.auto import partition
+
+            ensure_nltk_resource("averaged_perceptron_tagger_eng")
+            ensure_nltk_resource("punkt_tab")
 
             elements = partition(filename=file_path_str)
 

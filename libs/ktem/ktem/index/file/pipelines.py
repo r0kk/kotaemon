@@ -242,7 +242,7 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
             },
             "num_retrieval": {
                 "name": "Number of document chunks to retrieve",
-                "value": 10,
+                "value": 5,
                 "component": "number",
             },
             "retrieval_mode": {
@@ -741,6 +741,7 @@ class IndexDocumentPipeline(BaseFileIndexIndexing):
             reader = web_reader
         else:
             assert isinstance(file_path, Path)
+            print(f"Indexing file: '{file_path.name}'")
             ext = file_path.suffix.lower()
             reader = self.readers.get(ext, unstructured)
             if reader is None:

@@ -189,7 +189,7 @@ if config("LOCAL_MODEL", default=""):
             "model": config("LOCAL_MODEL", default="qwen2.5:7b"),
             "api_key": "ollama",
             "max_retries": 4,
-            "max_tokens": config("LOCAL_MODEL_CONTEXT"),
+            "max_tokens": config("LOCAL_MODEL_CONTEXT", cast=int),
             "timeout": 10,
         },
         "default": True,
@@ -217,7 +217,7 @@ if config("LOCAL_MODEL", default=""):
         "spec": {
             "__type__": "kotaemon.rerankings.TeiFastReranking",
             "model_name": config("KH_HUGGING_RERANK"),
-            "max_tokens": config("KH_HUGGING_RERANK_CONTEX"),
+            "max_tokens": config("KH_HUGGING_RERANK_CONTEX", cast=int),
             "endpoint_url": config("KH_HUGGING_RERANK_URL"),
             "is_truncated": True,
         },
@@ -275,7 +275,7 @@ KH_EMBEDDINGS["google"] = {
         "model": "models/text-embedding-004",
         "google_api_key": GOOGLE_API_KEY,
     },
-    "default": not IS_OPENAI_DEFAULT,
+    "default": False,
 }
 # KH_EMBEDDINGS["huggingface"] = {
 #     "spec": {
