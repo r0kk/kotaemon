@@ -133,7 +133,7 @@ class AzureAIDocumentIntelligenceLoader(BaseReader):
         with open(file_path, "rb") as fi:
             poller = self.client_.begin_analyze_document(
                 self.model,
-                body=fi,
+                analyze_request=fi,
                 content_type="application/octet-stream",
                 output_content_format=self.output_content_format,
             )
