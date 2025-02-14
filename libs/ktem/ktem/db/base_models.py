@@ -29,7 +29,7 @@ class BaseConversation(SQLModel):
             datetime.datetime.now(get_localzone()).strftime("%Y-%m-%d %H:%M:%S")
         )
     )
-    user: str = Field(default="")  # For now we only have one user
+    user: int = Field(default=0)  # For now we only have one user
 
     is_public: bool = Field(default=False)
 
@@ -55,9 +55,7 @@ class BaseUser(SQLModel):
 
     __table_args__ = {"extend_existing": True}
 
-    id: str = Field(
-        default_factory=lambda: uuid.uuid4().hex, primary_key=True, index=True
-    )
+    id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(unique=True)
     username_lower: str = Field(unique=True)
     password: str
@@ -78,7 +76,7 @@ class BaseSettings(SQLModel):
     id: str = Field(
         default_factory=lambda: uuid.uuid4().hex, primary_key=True, index=True
     )
-    user: str = Field(default="")
+    user: int = Field(default=0)
     setting: dict = Field(default={}, sa_column=Column(JSON))
 
 
@@ -99,4 +97,4 @@ class BaseIssueReport(SQLModel):
     issues: dict = Field(default={}, sa_column=Column(JSON))
     chat: Optional[dict] = Field(default=None, sa_column=Column(JSON))
     settings: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    user: Optional[str] = Field(default=None)
+    user: Optional[int] = Field(default=None)

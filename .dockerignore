@@ -11,5 +11,3 @@ env/
 README.md
 *.zip
 *.sh
-
-!/launch.sh

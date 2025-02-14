@@ -177,11 +177,7 @@ class VectorRetrieval(BaseRetrieval):
             ]
         elif self.retrieval_mode == "text":
             query = text.text if isinstance(text, Document) else text
-            docs = []
-            if scope:
-                docs = self.doc_store.query(
-                    query, top_k=top_k_first_round, doc_ids=scope
-                )
+            docs = self.doc_store.query(query, top_k=top_k_first_round, doc_ids=scope)
             result = [RetrievedDocument(**doc.to_dict(), score=-1.0) for doc in docs]
         elif self.retrieval_mode == "hybrid":
             # similarity search section
@@ -210,10 +206,9 @@ class VectorRetrieval(BaseRetrieval):
 
                 assert self.doc_store is not None
                 query = text.text if isinstance(text, Document) else text
-                if scope:
-                    ds_docs = self.doc_store.query(
-                        query, top_k=top_k_first_round, doc_ids=scope
-                    )
+                ds_docs = self.doc_store.query(
+                    query, top_k=top_k_first_round, doc_ids=scope
+                )
 
             vs_query_thread = threading.Thread(target=query_vectorstore)
             ds_query_thread = threading.Thread(target=query_docstore)

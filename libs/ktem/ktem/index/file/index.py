@@ -17,10 +17,6 @@ from kotaemon.storages import BaseDocumentStore, BaseVectorStore
 from .base import BaseFileIndexIndexing, BaseFileIndexRetriever
 
 
-def generate_uuid():
-    return str(uuid.uuid4())
-
-
 class FileIndex(BaseIndex):
     """
     File index to store and allow retrieval of files
@@ -80,7 +76,7 @@ class FileIndex(BaseIndex):
                     "date_created": Column(
                         DateTime(timezone=True), default=datetime.now(get_localzone())
                     ),
-                    "user": Column(String, default=""),
+                    "user": Column(Integer, default=1),
                     "note": Column(
                         MutableDict.as_mutable(JSON),  # type: ignore
                         default={},
@@ -105,7 +101,7 @@ class FileIndex(BaseIndex):
                     "date_created": Column(
                         DateTime(timezone=True), default=datetime.now(get_localzone())
                     ),
-                    "user": Column(String, default=""),
+                    "user": Column(Integer, default=1),
                     "note": Column(
                         MutableDict.as_mutable(JSON),  # type: ignore
                         default={},
@@ -121,7 +117,7 @@ class FileIndex(BaseIndex):
                 "source_id": Column(String),
                 "target_id": Column(String),
                 "relation_type": Column(String),
-                "user": Column(String, default=""),
+                "user": Column(Integer, default=1),
             },
         )
         FileGroup = type(
@@ -129,20 +125,12 @@ class FileIndex(BaseIndex):
             (Base,),
             {
                 "__tablename__": f"index__{self.id}__group",
-                "__table_args__": (
-                    UniqueConstraint("name", "user", name="_name_user_uc"),
-                ),
-                "id": Column(
-                    String,
-                    primary_key=True,
-                    default=lambda: str(uuid.uuid4()),
-                    unique=True,
-                ),
+                "id": Column(Integer, primary_key=True, autoincrement=True),
                 "date_created": Column(
                     DateTime(timezone=True), default=datetime.now(get_localzone())
                 ),
-                "name": Column(String),
-                "user": Column(String, default=""),
+                "name": Column(String, unique=True),
+                "user": Column(Integer, default=1),
                 "data": Column(
                     MutableDict.as_mutable(JSON),  # type: ignore
                     default={"files": []},
