@@ -186,15 +186,6 @@ if config("LOCAL_MODEL", default=""):
         },
         "default": True,
     }
-    KH_LLMS["ollama-long-context"] = {
-        "spec": {
-            "__type__": "kotaemon.llms.LCOllamaChat",
-            "base_url": KH_OLLAMA_URL.replace("v1/", ""),
-            "model": config("LOCAL_MODEL", default="qwen2.5:7b"),
-            "num_ctx": 8192,
-        },
-        "default": False,
-    }
 
     KH_EMBEDDINGS["hugging_embedd"] = {
         "spec": {
@@ -265,7 +256,7 @@ KH_EMBEDDINGS["google"] = {
     "spec": {
         "__type__": "kotaemon.embeddings.LCGoogleEmbeddings",
         "model": "models/text-embedding-004",
-        "google_api_key": GOOGLE_API_KEY,
+        "google_api_key": config("GOOGLE_API_KEY", default="your-key"),
     },
     "default": False,
 }
