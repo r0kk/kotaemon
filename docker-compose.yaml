@@ -3,7 +3,7 @@ services:
     build:
       dockerfile: Dockerfile
       target: full
-    image: koteamon:v.0.10.2
+    image: koteamon:v.0.10.3
     container_name: koteamon
     env_file:
       - .env

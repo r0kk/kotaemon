@@ -66,7 +66,7 @@ os.environ["HF_HUB_CACHE"] = str(KH_APP_DATA_DIR / "huggingface")
 # doc directory
 KH_DOC_DIR = this_dir / "docs"
 
-KH_MODE = "dev"
+KH_MODE = config("KH_MODE", default="dev")
 KH_SSO_ENABLED = config("KH_SSO_ENABLED", default=False, cast=bool)
 
 KH_FEATURE_CHAT_SUGGESTION = config(
@@ -239,7 +239,7 @@ KH_LLMS["google"] = {
         "model_name": "gemini-1.5-flash",
         "api_key": GOOGLE_API_KEY,
     },
-    "default": not IS_OPENAI_DEFAULT,
+    "default": False,
 }
 KH_LLMS["groq"] = {
     "spec": {
@@ -361,7 +361,7 @@ GRAPHRAG_INDICES = [
                 ".png, .jpeg, .jpg, .tiff, .tif, .pdf, .xls, .xlsx, .doc, .docx, "
                 ".pptx, .csv, .html, .mhtml, .txt, .md, .zip"
             ),
-            "private": True,
+            "private": False,
         },
         "index_type": graph_type,
     }
@@ -372,11 +372,8 @@ KH_INDICES = [
     {
         "name": "File Collection",
         "config": {
-            "supported_file_types": (
-                ".png, .jpeg, .jpg, .tiff, .tif, .pdf, .xls, .xlsx, .doc, .docx, "
-                ".pptx, .csv, .html, .mhtml, .txt, .md, .zip"
-            ),
-            "private": True,
+            "supported_file_types": (".pdf, .xls, .xlsx, .doc, .docx, .pptx"),
+            "private": False,
         },
         "index_type": "ktem.index.file.FileIndex",
     },
@@ -391,3 +388,9 @@ FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE = int(
 FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP = config(
     "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP", default=256, cast=int
 )
+
+KH_APP_NAME = config("KH_APP_NAME", default="Kotaemon", cast=str)
+SENTRY_DSN = config("SENTRY_DSN", default="", cast=str)
+SENTRY_ENVIRONMENT = config("KH_MODE", cast=str)
+SENTRY_TRACES_SAMPLE_RATE = config("SENTRY_TRACES_SAMPLE_RATE", default=1.0, cast=float)
+SENTRY_TRACES_SAMPLER = config("SENTRY_TRACES_SAMPLER", default=1.0, cast=float)
