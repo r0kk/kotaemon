@@ -1,6 +1,16 @@
 import os
 
+import sentry_sdk
 from theflow.settings import settings as flowsettings
+
+sentry_sdk.init(
+    dsn=getattr(flowsettings, "SENTRY_DSN"),
+    release=getattr(flowsettings, "KH_APP_VERSION"),
+    environment=getattr(flowsettings, "SENTRY_ENVIRONMENT"),
+    traces_sampler=getattr(flowsettings, "SENTRY_TRACES_SAMPLER"),
+    traces_sample_rate=getattr(flowsettings, "SENTRY_TRACES_SAMPLE_RATE"),
+    send_default_pii=True,
+)
 
 KH_APP_DATA_DIR = getattr(flowsettings, "KH_APP_DATA_DIR", ".")
 KH_GRADIO_SHARE = getattr(flowsettings, "KH_GRADIO_SHARE", False)
@@ -23,5 +33,5 @@ demo.queue().launch(
         GRADIO_TEMP_DIR,
     ],
     share=KH_GRADIO_SHARE,
-    app_kwargs={"docs_url": "/docs"}
+    app_kwargs={"docs_url": "/docs"},
 )

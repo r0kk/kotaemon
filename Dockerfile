@@ -80,7 +80,8 @@ RUN --mount=type=ssh  \
 RUN --mount=type=ssh  \
     --mount=type=cache,target=/root/.cache/pip  \
     pip install -e "libs/kotaemon[adv]" \
-    && pip install unstructured[all-docs]
+    && pip install unstructured[all-docs] \
+    pip install sentry-sdk==2.21.0
 
 # Install lightRAG
 ENV USE_LIGHTRAG=true
