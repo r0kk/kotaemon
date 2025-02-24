@@ -1,3 +1,6 @@
+import logging
+import threading
+import time
 from typing import Any, List, Optional, cast
 
 from .base import LlamaIndexVectorStore
@@ -25,6 +28,8 @@ class QdrantVectorStore(LlamaIndexVectorStore):
         url: Optional[str] = None,
         api_key: Optional[str] = None,
         client_kwargs: Optional[dict] = None,
+        keep_alive: Optional[bool] = False,
+        keep_alive_interval: Optional[int] = 600,
         **kwargs: Any,
     ):
         self._collection_name = collection_name
@@ -45,6 +50,13 @@ class QdrantVectorStore(LlamaIndexVectorStore):
         )
 
         self._client = cast(LIQdrantVectorStore, self._client)
+
+        if keep_alive:
+            self._keep_alive_interval = keep_alive_interval
+            self._keep_alive_thread = threading.Thread(
+                target=self._keep_qdrant_alive, daemon=True
+            )
+            self._keep_alive_thread.start()
 
     def delete(self, ids: List[str], **kwargs):
         """Delete vector embeddings from vector stores
@@ -80,3 +92,13 @@ class QdrantVectorStore(LlamaIndexVectorStore):
             "client_kwargs": self._client_kwargs,
             **self._kwargs,
         }
+
+    def _keep_qdrant_alive(self):
+        """Ping Qdrant periodically to keep the connection alive."""
+        while True:
+            try:
+                self._client._client.get_collections()
+                logging.debug("Qdrant keep-alive successful.")
+            except Exception as e:
+                logging.error("Qdrant keep-alive error:", e)
+            time.sleep(self._keep_alive_interval)
