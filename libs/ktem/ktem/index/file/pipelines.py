@@ -100,7 +100,8 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
     top_k: int = 5
     retrieval_mode: str = "hybrid"
 
-    @Node.auto(depends_on=["embedding", "VS", "DS"])
+    # @Node.auto(depends_on=["embedding", "VS", "DS"])
+    @Node.auto(depends_on=["embedding", "VS"])
     def vector_retrieval(self) -> VectorRetrieval:
         return VectorRetrieval(
             embedding=self.embedding,
