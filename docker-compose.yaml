@@ -18,6 +18,12 @@ services:
     restart: unless-stopped
     networks:
       - my_network
+    # we wan't to restart koteamon every hour, because Qdrant client gets unresponsive
+    healthcheck:
+      test: ["CMD", "false"]
+      interval: 60m
+      timeout: 10s
+      retries: 1
 
 networks:
   my_network:
