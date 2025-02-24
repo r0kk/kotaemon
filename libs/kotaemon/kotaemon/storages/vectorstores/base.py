@@ -84,19 +84,14 @@ class LlamaIndexVectorStore(BaseVectorStore):
 
     def __init__(self, *args, **kwargs):
         # get li_class from the method if not set
+        self._args = args
+        self._kwargs = kwargs
         if not self._li_class:
-            LIClass = self._get_li_class()
+            self._LIClass = self._get_li_class()
         else:
-            LIClass = self._li_class
+            self._LIClass = self._li_class
 
-        from dataclasses import fields
-
-        self._client = LIClass(*args, **kwargs)
-
-        self._vsq_kwargs = {_.name for _ in fields(VectorStoreQuery)}
-        for key in ["query_embedding", "similarity_top_k", "node_ids"]:
-            if key in self._vsq_kwargs:
-                self._vsq_kwargs.remove(key)
+        self.refresh_client()
 
     def __setattr__(self, name: str, value: Any) -> None:
         if name.startswith("_"):
@@ -184,3 +179,17 @@ class LlamaIndexVectorStore(BaseVectorStore):
         out_ids = output.ids if output.ids else []
 
         return embeddings, similarities, out_ids
+
+    def refresh_client(self):
+        """Refresh Qdrant client to prevent idle connection issues.
+
+        TODO: This is only a temporary solution
+        """
+        from dataclasses import fields
+
+        self._client = self._LIClass(*self._args, **self._kwargs)
+
+        self._vsq_kwargs = {_.name for _ in fields(VectorStoreQuery)}
+        for key in ["query_embedding", "similarity_top_k", "node_ids"]:
+            if key in self._vsq_kwargs:
+                self._vsq_kwargs.remove(key)

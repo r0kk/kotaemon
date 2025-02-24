@@ -99,9 +99,13 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
     mmr: bool = False
     top_k: int = 5
     retrieval_mode: str = "hybrid"
+    refresh_vs_client: bool = True
 
     @Node.auto(depends_on=["embedding", "VS", "DS"])
     def vector_retrieval(self) -> VectorRetrieval:
+        if self.refresh_vs_client:
+            self.VS.refresh_client()
+
         return VectorRetrieval(
             embedding=self.embedding,
             vector_store=self.VS,
@@ -136,11 +140,13 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
                     flatten_doc_ids.append(doc_id)
             doc_ids = flatten_doc_ids
 
-        print("searching in doc_ids", doc_ids)
         if not doc_ids:
             logger.info(f"Skip retrieval because of no selected files: {self}")
             return []
 
+        logger.info(f"searching in nr doc_ids: '{len(doc_ids)}'")
+
+        s_time = time.time()
         retrieval_kwargs: dict = {}
         with Session(engine) as session:
             stmt = select(self.Index).where(
@@ -149,6 +155,8 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
             )
             results = session.execute(stmt)
             chunk_ids = [r[0].target_id for r in results.all()]
+
+        logger.info(f"Docs retrieval step took: '{time.time() - s_time}'")
 
         # do first round top_k extension
         retrieval_kwargs["do_extend"] = True

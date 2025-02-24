@@ -1,3 +1,4 @@
+import logging
 import os
 from importlib.metadata import version
 from inspect import currentframe, getframeinfo
@@ -94,6 +95,9 @@ KH_DOCSTORE = {
     "__type__": "kotaemon.storages.ElasticsearchDocumentStore",
     "elasticsearch_url": [config("ELASTIC_URL")],
     "basic_auth": (config("ELASTIC_USERNAME"), config("ELASTIC_PASSWORD")),
+    "max_retries": 4,
+    "retry_on_timeout": True,
+    "timeout": 10,
     # "api_key": "",
     # "__type__": "kotaemon.storages.SimpleFileDocumentStore",
     # "__type__": "kotaemon.storages.LanceDBDocumentStore",
@@ -109,7 +113,10 @@ KH_VECTORSTORE = {
     "__type__": "kotaemon.storages.QdrantVectorStore",
     "url": config("QDRANT_URL"),
     "api_key": config("QUADRANT_API_KEY"),
-    "client_kwargs": {},  # Additional options to pass to qdrant_client.QdrantClient
+    "client_kwargs": {
+        "timeout": 10,
+        "prefer_grpc": False,
+    },
 }
 KH_LLMS = {}
 KH_EMBEDDINGS = {}
@@ -389,8 +396,22 @@ FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP = config(
     "FILE_INDEX_PIPELINE_SPLITTER_CHUNK_OVERLAP", default=256, cast=int
 )
 
+# logging
 KH_APP_NAME = config("KH_APP_NAME", default="Kotaemon", cast=str)
 SENTRY_DSN = config("SENTRY_DSN", default="", cast=str)
 SENTRY_ENVIRONMENT = config("KH_MODE", cast=str)
 SENTRY_TRACES_SAMPLE_RATE = config("SENTRY_TRACES_SAMPLE_RATE", default=1.0, cast=float)
 SENTRY_TRACES_SAMPLER = config("SENTRY_TRACES_SAMPLER", default=1.0, cast=float)
+
+LOG_LEVEL = config("LOG_LEVEL", cast=str)
+
+log_levels = {
+    "CRITICAL": logging.CRITICAL,
+    "ERROR": logging.ERROR,
+    "WARNING": logging.WARNING,
+    "INFO": logging.INFO,
+    "DEBUG": logging.DEBUG,
+    "NOTSET": logging.NOTSET,
+}
+
+logging.basicConfig(level=log_levels.get(LOG_LEVEL, logging.WARNING))

@@ -1639,8 +1639,8 @@ class FileSelector(BasePage):
 
     def default(self):
         if self._app.f_user_management:
-            return "all", [], -1
-        return "all", [], 1
+            return "disabled", [], -1
+        return "disabled", [], 1
 
     def on_building_ui(self):
         default_mode, default_selector, user_id = self.default()
