@@ -33,4 +33,4 @@ class LLMTable(_base_llm):  # type: ignore
 
 
 if not getattr(flowsettings, "KH_ENABLE_ALEMBIC", False):
-    LLMTable.metadata.create_all(engine)
+    LLMTable.metadata.create_all(engine, checkfirst=True)

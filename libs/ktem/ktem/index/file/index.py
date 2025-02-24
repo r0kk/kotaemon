@@ -66,7 +66,11 @@ class FileIndex(BaseIndex):
                 {
                     "__tablename__": f"index__{self.id}__source",
                     "__table_args__": (
-                        UniqueConstraint("name", "user", name="_name_user_uc"),
+                        UniqueConstraint(
+                            "name",
+                            "user",
+                            name=f"_name_user_uc_{self.id}_{uuid.uuid4()}",
+                        ),
                     ),
                     "id": Column(
                         String,
@@ -130,7 +134,11 @@ class FileIndex(BaseIndex):
             {
                 "__tablename__": f"index__{self.id}__group",
                 "__table_args__": (
-                    UniqueConstraint("name", "user", name="_name_user_uc"),
+                    UniqueConstraint(
+                        "name",
+                        "user",
+                        name=f"_name_user_uc_{self.id}_{uuid.uuid4()}",
+                    ),
                 ),
                 "id": Column(
                     String,
@@ -326,9 +334,9 @@ class FileIndex(BaseIndex):
 
         # create the resources
         self._setup_resources()
-        self._resources["Source"].metadata.create_all(engine)  # type: ignore
-        self._resources["Index"].metadata.create_all(engine)  # type: ignore
-        self._resources["FileGroup"].metadata.create_all(engine)  # type: ignore
+        self._resources["Source"].metadata.create_all(engine, checkfirst=True)  # type: ignore
+        self._resources["Index"].metadata.create_all(engine, checkfirst=True)  # type: ignore
+        self._resources["FileGroup"].metadata.create_all(engine, checkfirst=True)  # type: ignore
         self._fs_path.mkdir(parents=True, exist_ok=True)
 
     def on_delete(self):

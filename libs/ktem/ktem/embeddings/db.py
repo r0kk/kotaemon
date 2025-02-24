@@ -33,4 +33,4 @@ class EmbeddingTable(_base_llm):  # type: ignore
 
 
 if not getattr(flowsettings, "KH_ENABLE_ALEMBIC", False):
-    EmbeddingTable.metadata.create_all(engine)
+    EmbeddingTable.metadata.create_all(engine, checkfirst=True)

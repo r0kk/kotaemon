@@ -83,7 +83,9 @@ KH_FEATURE_USER_MANAGEMENT_PASSWORD = str(
     config("KH_FEATURE_USER_MANAGEMENT_PASSWORD", default="admin")
 )
 KH_ENABLE_ALEMBIC = False
-KH_DATABASE = f"sqlite:///{KH_USER_DATA_DIR / 'sql.db'}"
+# KH_DATABASE = f"sqlite:///{KH_USER_DATA_DIR / 'sql.db'}"
+KH_DATABASE = f"postgresql://{config('POSTGRES_USER')}:{config('POSTGRES_PASSWORD')}@{config('POSTGRES_URL')}/postgres"
+
 KH_FILESTORAGE_PATH = str(KH_USER_DATA_DIR / "files")
 KH_WEB_SEARCH_BACKEND = (
     "kotaemon.indices.retrievers.tavily_web_search.WebSearch"
@@ -373,7 +375,7 @@ KH_INDICES = [
         "name": "File Collection",
         "config": {
             "supported_file_types": (".pdf, .xls, .xlsx, .doc, .docx, .pptx"),
-            "private": False,
+            "private": True,
         },
         "index_type": "ktem.index.file.FileIndex",
     },

@@ -20,6 +20,7 @@ numpy = "<2.0"
 lightrag = "^0.1.0b6"
 unstructured = {extras = ["all-docs"], version = "^0.16.20"}
 sentry-sdk = "^2.21.0"
+psycopg2 = "^2.9.10"
 
 [build-system]
 requires = ["setuptools >= 61.0", "wheel", "setuptools-git-versioning>=2.0,<3"]
