@@ -1,17 +1,26 @@
+import time
 from pathlib import Path
 from typing import Generator, Optional
 
 from kotaemon.base import BaseComponent, Document, Param
 
 
-class BaseFileIndexRetriever(BaseComponent):
+def refresh_interval(self) -> int:
+    return int(time.time() // 600)
 
+
+class BaseFileIndexRetriever(BaseComponent):
     Source = Param(help="The SQLAlchemy Source table")
     Index = Param(help="The SQLAlchemy Index table")
-    VS = Param(help="The VectorStore")
-    DS = Param(help="The DocStore")
+    VS = Param(help="The VectorStore", cache=False, refresh_on_set=True)
+    DS = Param(help="The DocStore", cache=False, refresh_on_set=True)
     FSPath = Param(help="The file storage path")
     user_id = Param(help="The user id")
+    refresh_interval: int = Param(
+        auto_callback=refresh_interval,
+        cache=False,
+        refresh_on_set=True,
+    )
 
     @classmethod
     def get_user_settings(cls) -> dict:
@@ -50,13 +59,18 @@ class BaseFileIndexIndexing(BaseComponent):
 
     Source = Param(help="The SQLAlchemy Source table")
     Index = Param(help="The SQLAlchemy Index table")
-    VS = Param(help="The VectorStore")
-    DS = Param(help="The DocStore")
+    VS = Param(help="The VectorStore", cache=False, refresh_on_set=True)
+    DS = Param(help="The DocStore", cache=False, refresh_on_set=True)
     FSPath = Param(help="The file storage path")
     user_id = Param(help="The user id")
     private = Param(False, help="Whether this is private index")
     chunk_size = Param(help="Chunk size for this index")
     chunk_overlap = Param(help="Chunk overlap for this index")
+    refresh_interval: int = Param(
+        auto_callback=refresh_interval,
+        cache=False,
+        refresh_on_set=True,
+    )
 
     def run(
         self, file_paths: str | Path | list[str | Path], *args, **kwargs

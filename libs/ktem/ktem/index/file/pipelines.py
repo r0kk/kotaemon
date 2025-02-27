@@ -101,7 +101,7 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
     retrieval_mode: str = "hybrid"
     refresh_vs_client: bool = True
 
-    @Node.auto(depends_on=["embedding", "VS", "DS"])
+    @Node.auto(depends_on=["embedding", "VS", "DS", "refresh_interval"])
     def vector_retrieval(self) -> VectorRetrieval:
         if self.refresh_vs_client:
             self.VS.refresh_client()
@@ -333,6 +333,10 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
         return retriever
 
 
+def refresh_interval(self) -> int:
+    return int(time.time() // 600)
+
+
 class IndexPipeline(BaseComponent):
     """Index a single file"""
 
@@ -342,16 +346,21 @@ class IndexPipeline(BaseComponent):
 
     Source = Param(help="The SQLAlchemy Source table")
     Index = Param(help="The SQLAlchemy Index table")
-    VS = Param(help="The VectorStore")
-    DS = Param(help="The DocStore")
+    VS = Param(help="The VectorStore", cache=False, refresh_on_set=True)
+    DS = Param(help="The DocStore", cache=False, refresh_on_set=True)
     FSPath = Param(help="The file storage path")
     user_id = Param(help="The user id")
     collection_name: str = "default"
     private: bool = False
     run_embedding_in_thread: bool = False
     embedding: BaseEmbeddings
+    refresh_interval: int = Param(
+        auto_callback=refresh_interval,
+        cache=False,
+        refresh_on_set=True,
+    )
 
-    @Node.auto(depends_on=["Source", "Index", "embedding"])
+    @Node.auto(depends_on=["Source", "Index", "embedding", "refresh_interval"])
     def vector_indexing(self) -> VectorIndexing:
         return VectorIndexing(
             vector_store=self.VS, doc_store=self.DS, embedding=self.embedding
@@ -767,7 +776,7 @@ class IndexDocumentPipeline(BaseFileIndexIndexing):
                 chunk_size=chunk_size or 1024,
                 chunk_overlap=chunk_overlap or 256,
                 separator="\n\n",
-                backup_separators=["\n", ".", "\u200B"],
+                backup_separators=["\n", ".", "\u200b"],
             ),
             run_embedding_in_thread=self.run_embedding_in_thread,
             Source=self.Source,
