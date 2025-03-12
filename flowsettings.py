@@ -34,7 +34,8 @@ KH_OLLAMA_URL = config("KH_OLLAMA_URL", default="http://localhost:11434/v1/")
 
 # App can be ran from anywhere and it's not trivial to decide where to store app data.
 # So let's use the same directory as the flowsetting.py file.
-KH_APP_DATA_DIR = this_dir / "ktem_app_data"
+KH_DEPLOYMENT_NAME = config("KH_DEPLOYMENT_NAME").lower()
+KH_APP_DATA_DIR = this_dir / f"ktem_app_data_{KH_DEPLOYMENT_NAME}"
 KH_APP_DATA_EXISTS = KH_APP_DATA_DIR.exists()
 KH_APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -84,7 +85,9 @@ KH_FEATURE_USER_MANAGEMENT_PASSWORD = str(
     config("KH_FEATURE_USER_MANAGEMENT_PASSWORD", default="admin")
 )
 KH_ENABLE_ALEMBIC = False
-KH_DATABASE = f"sqlite:///{KH_USER_DATA_DIR / 'sql.db'}"
+# KH_DATABASE = f"sqlite:///{KH_USER_DATA_DIR / 'sql.db'}"
+KH_DATABASE = f"postgresql://{config('POSTGRES_USER')}:{config('POSTGRES_PASSWORD')}@{config('POSTGRES_URL')}/postgres"
+
 KH_FILESTORAGE_PATH = str(KH_USER_DATA_DIR / "files")
 KH_WEB_SEARCH_BACKEND = (
     "kotaemon.indices.retrievers.tavily_web_search.WebSearch"
@@ -362,13 +365,13 @@ KH_INDEX_TYPES = [
 GRAPHRAG_INDICES = [
     {
         "name": graph_type.split(".")[-1].replace("Index", "")
-        + " Collection",  # get last name
+        + f" Collection {KH_DEPLOYMENT_NAME}",
         "config": {
             "supported_file_types": (
                 ".png, .jpeg, .jpg, .tiff, .tif, .pdf, .xls, .xlsx, .doc, .docx, "
                 ".pptx, .csv, .html, .mhtml, .txt, .md, .zip"
             ),
-            "private": False,
+            "private": config("PRIVATE", cast=bool),
         },
         "index_type": graph_type,
     }
@@ -377,10 +380,10 @@ GRAPHRAG_INDICES = [
 
 KH_INDICES = [
     {
-        "name": "File Collection",
+        "name": f"File Collection {KH_DEPLOYMENT_NAME}",
         "config": {
             "supported_file_types": (".pdf, .xls, .xlsx, .doc, .docx, .pptx"),
-            "private": False,
+            "private": config("PRIVATE", cast=bool),
         },
         "index_type": "ktem.index.file.FileIndex",
     },
@@ -388,7 +391,6 @@ KH_INDICES = [
 ]
 
 # File index pipeline settings
-
 FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE = int(
     config("FILE_INDEX_PIPELINE_SPLITTER_CHUNK_SIZE", default=512, cast=int)
 )

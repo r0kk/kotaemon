@@ -46,4 +46,4 @@ class IssueReport(_base_issue_report, table=True):  # type: ignore
 
 
 if not getattr(settings, "KH_ENABLE_ALEMBIC", False):
-    SQLModel.metadata.create_all(engine)
+    SQLModel.metadata.create_all(engine, checkfirst=True)

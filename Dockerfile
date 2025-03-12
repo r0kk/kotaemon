@@ -83,6 +83,12 @@ RUN --mount=type=ssh  \
     && pip install unstructured[all-docs] \
     && pip install "sentry-sdk==2.21.0"
 
+# install postgress drivers
+RUN apt-get update \
+    && apt-get install -y libpq-dev=15.10-0+deb12u1 gcc \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install "psycopg2==2.9.10"
+
 # Install lightRAG
 ENV USE_LIGHTRAG=true
 RUN --mount=type=ssh  \

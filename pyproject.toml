@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "koteamon-rag"
+name = "koteamon-app"
 version = "0.0.1"
 description = "RAG application for document search."
 authors = ["RK"]
@@ -8,6 +8,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
 ]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
@@ -20,6 +21,7 @@ numpy = "<2.0"
 lightrag = "^0.1.0b6"
 unstructured = {extras = ["all-docs"], version = "^0.16.20"}
 sentry-sdk = "^2.21.0"
+psycopg2 = "^2.9.10"
 
 [build-system]
 requires = ["setuptools >= 61.0", "wheel", "setuptools-git-versioning>=2.0,<3"]

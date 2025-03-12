@@ -16,4 +16,4 @@ class Index(SQLModel, table=True):
     config: dict = Field(default={}, sa_column=Column(JSON))
 
 
-Index.metadata.create_all(engine)
+Index.metadata.create_all(engine, checkfirst=True)

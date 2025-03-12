@@ -33,4 +33,4 @@ class RerankingTable(__base_reranking):  # type: ignore
 
 
 if not getattr(flowsettings, "KH_ENABLE_ALEMBIC", False):
-    RerankingTable.metadata.create_all(engine)
+    RerankingTable.metadata.create_all(engine, checkfirst=True)

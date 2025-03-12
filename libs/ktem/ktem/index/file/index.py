@@ -2,9 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Optional, Type
 
-from ktem.components import filestorage_path, get_docstore, get_vectorstore
-from ktem.db.engine import engine
-from ktem.index.base import BaseIndex
+from kotaemon.storages import BaseDocumentStore, BaseVectorStore
 from sqlalchemy import JSON, Column, DateTime, Integer, String, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.mutable import MutableDict
@@ -12,7 +10,9 @@ from theflow.settings import settings as flowsettings
 from theflow.utils.modules import import_dotted_string
 from tzlocal import get_localzone
 
-from kotaemon.storages import BaseDocumentStore, BaseVectorStore
+from ktem.components import filestorage_path, get_docstore, get_vectorstore
+from ktem.db.engine import engine
+from ktem.index.base import BaseIndex
 
 from .base import BaseFileIndexIndexing, BaseFileIndexRetriever
 
@@ -58,15 +58,20 @@ class FileIndex(BaseIndex):
             - File storage path
         """
         Base = declarative_base()
+        deployment = getattr(flowsettings, "KH_DEPLOYMENT_NAME")
 
         if self.config.get("private", False):
             Source = type(
                 "Source",
                 (Base,),
                 {
-                    "__tablename__": f"index__{self.id}__source",
+                    "__tablename__": f"index__{deployment}_{self.id}__source",
                     "__table_args__": (
-                        UniqueConstraint("name", "user", name="_name_user_uc"),
+                        UniqueConstraint(
+                            "name",
+                            "user",
+                            name=f"_name_user_uc_{self.id}_{uuid.uuid4()}",
+                        ),
                     ),
                     "id": Column(
                         String,
@@ -92,7 +97,7 @@ class FileIndex(BaseIndex):
                 "Source",
                 (Base,),
                 {
-                    "__tablename__": f"index__{self.id}__source",
+                    "__tablename__": f"index__{deployment}_{self.id}__source",
                     "id": Column(
                         String,
                         primary_key=True,
@@ -116,7 +121,7 @@ class FileIndex(BaseIndex):
             "IndexTable",
             (Base,),
             {
-                "__tablename__": f"index__{self.id}__index",
+                "__tablename__": f"index__{deployment}_{self.id}__index",
                 "id": Column(Integer, primary_key=True, autoincrement=True),
                 "source_id": Column(String),
                 "target_id": Column(String),
@@ -128,9 +133,13 @@ class FileIndex(BaseIndex):
             "FileGroupTable",
             (Base,),
             {
-                "__tablename__": f"index__{self.id}__group",
+                "__tablename__": f"index__{deployment}_{self.id}__group",
                 "__table_args__": (
-                    UniqueConstraint("name", "user", name="_name_user_uc"),
+                    UniqueConstraint(
+                        "name",
+                        "user",
+                        name=f"_name_user_uc_{self.id}_{uuid.uuid4()}",
+                    ),
                 ),
                 "id": Column(
                     String,
@@ -150,9 +159,12 @@ class FileIndex(BaseIndex):
             },
         )
 
-        self._vs: BaseVectorStore = get_vectorstore(f"index_{self.id}")
-        self._docstore: BaseDocumentStore = get_docstore(f"index_{self.id}")
-        self._fs_path = filestorage_path / f"index_{self.id}"
+        deployment = getattr(flowsettings, "KH_DEPLOYMENT_NAME")
+        self._vs: BaseVectorStore = get_vectorstore(f"index_{deployment}_{self.id}")
+        self._docstore: BaseDocumentStore = get_docstore(
+            f"index_{deployment}_{self.id}"
+        )
+        self._fs_path = filestorage_path / f"index_{deployment}_{self.id}"
         self._resources = {
             "Source": Source,
             "Index": Index,
@@ -326,9 +338,9 @@ class FileIndex(BaseIndex):
 
         # create the resources
         self._setup_resources()
-        self._resources["Source"].metadata.create_all(engine)  # type: ignore
-        self._resources["Index"].metadata.create_all(engine)  # type: ignore
-        self._resources["FileGroup"].metadata.create_all(engine)  # type: ignore
+        self._resources["Source"].metadata.create_all(engine, checkfirst=True)  # type: ignore
+        self._resources["Index"].metadata.create_all(engine, checkfirst=True)  # type: ignore
+        self._resources["FileGroup"].metadata.create_all(engine, checkfirst=True)  # type: ignore
         self._fs_path.mkdir(parents=True, exist_ok=True)
 
     def on_delete(self):
@@ -418,7 +430,7 @@ class FileIndex(BaseIndex):
             },
             "chunk_size": {
                 "name": "Size of chunk (number of tokens)",
-                "value": 0,
+                "value": 512,
                 "component": "number",
                 "info": (
                     "Number of tokens of each text segment. "
@@ -427,7 +439,7 @@ class FileIndex(BaseIndex):
             },
             "chunk_overlap": {
                 "name": "Number of overlapping tokens between chunks",
-                "value": 0,
+                "value": 128,
                 "component": "number",
                 "info": (
                     "Number of tokens that consecutive text segments "

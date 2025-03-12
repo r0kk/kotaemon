@@ -188,7 +188,9 @@ class IndexManager:
                 self.build_index(**index)
 
         with Session(engine) as sess:
-            index_defs = sess.exec(select(Index))
+            index_names = [idx["name"] for idx in settings.KH_INDICES]
+            stmt = select(Index).where(Index.name.in_(index_names))
+            index_defs = sess.exec(stmt)
             for index_def in index_defs:
                 self.start_index(**index_def.model_dump())
 

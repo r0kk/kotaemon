@@ -475,7 +475,7 @@ storage/*
 doc_env/
 
 # application data
-ktem_app_data/
+ktem_app_data*/
 gradio_tmp/
 
 # vscode
