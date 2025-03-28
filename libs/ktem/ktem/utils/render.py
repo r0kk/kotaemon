@@ -2,7 +2,6 @@ import os
 
 import markdown
 from fast_langdetect import detect
-
 from kotaemon.base import RetrievedDocument
 
 BASE_PATH = os.environ.get("GR_FILE_ROOT_PATH", "")
@@ -85,14 +84,10 @@ class Render:
             return html_content
 
         is_pdf = doc.metadata.get("file_type", "") == "application/pdf"
-        page_idx = int(doc.metadata.get("page_label", 1))
+        page_idx = doc.metadata["page_label"]
 
         if not is_pdf:
             print("Document is not pdf")
-            return html_content
-
-        if page_idx < 0:
-            print("Fail to extract page number")
             return html_content
 
         if not highlight_text:

@@ -114,44 +114,30 @@ class PDFThumbnailReader(PDFReader):
                     process.join()
                 raise e
 
-        page_numbers_str = []
-        filtered_docs = []
-        is_int_page_number: dict[str, bool] = {}
+        # Collect page labels (as strings), falling back to index if missing
+        page_labels = []
+        for idx, doc in enumerate(documents):
+            label = doc.metadata.get("page_label", str(idx))
+            page_labels.append(label)
 
-        for doc in documents:
-            if "page_label" in doc.metadata:
-                page_num_str = doc.metadata["page_label"]
-                page_numbers_str.append(page_num_str)
-                try:
-                    _ = int(page_num_str)
-                    is_int_page_number[page_num_str] = True
-                    filtered_docs.append(doc)
-                except ValueError:
-                    is_int_page_number[page_num_str] = False
-                    continue
+        # Get thumbnails using numeric indices
+        page_indices = list(range(len(page_labels)))
+        page_thumbnails = get_page_thumbnails(file, page_indices)
 
-        documents = filtered_docs
-        page_numbers = list(range(len(page_numbers_str)))
+        # Append thumbnail documents
+        thumbnail_docs = [
+            Document(
+                text="Page thumbnail",
+                metadata={
+                    "image_origin": thumbnail,
+                    "type": "thumbnail",
+                    "page_label": label,
+                    **(extra_info if extra_info else {}),
+                },
+            )
+            for thumbnail, label in zip(page_thumbnails, page_labels)
+        ]
 
-        print("Page numbers:", len(page_numbers))
-        page_thumbnails = get_page_thumbnails(file, page_numbers)
-
-        documents.extend(
-            [
-                Document(
-                    text="Page thumbnail",
-                    metadata={
-                        "image_origin": page_thumbnail,
-                        "type": "thumbnail",
-                        "page_label": page_number,
-                        **(extra_info if extra_info is not None else {}),
-                    },
-                )
-                for (page_thumbnail, page_number) in zip(
-                    page_thumbnails, page_numbers_str
-                )
-                if is_int_page_number[page_number]
-            ]
-        )
+        documents.extend(thumbnail_docs)
 
         return documents
