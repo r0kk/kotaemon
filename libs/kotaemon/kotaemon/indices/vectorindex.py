@@ -70,7 +70,7 @@ class VectorIndexing(BaseIndexing):
                     markdown_content += f"\ntext:\n{docs[i].text}"
 
                 with open(
-                    Path(self.cache_dir) / f"{file_name.stem}_{self.count_+i}.md",
+                    Path(self.cache_dir) / f"{file_name.stem}_{self.count_ + i}.md",
                     "w",
                     encoding="utf-8",
                 ) as f:
@@ -163,6 +163,8 @@ class VectorRetrieval(BaseRetrieval):
         result: list[RetrievedDocument] = []
         # TODO: should declare scope directly in the run params
         scope = kwargs.pop("scope", None)
+        scope_vs = kwargs.pop("scope_vs", None)
+
         emb: list[float]
 
         if self.retrieval_mode == "vector":
@@ -194,11 +196,35 @@ class VectorRetrieval(BaseRetrieval):
                 nonlocal vs_docs
                 nonlocal vs_scores
                 nonlocal vs_ids
+                nonlocal scope_vs
 
                 assert self.doc_store is not None
-                _, vs_scores, vs_ids = self.vector_store.query(
-                    embedding=emb, top_k=top_k_first_round, **kwargs
-                )
+                from llama_index.vector_stores.qdrant.base import QdrantVectorStore
+
+                if scope_vs is not None and isinstance(
+                    self.vector_store._client, QdrantVectorStore
+                ):
+                    from qdrant_client.http.models import (
+                        FieldCondition,
+                        Filter,
+                        MatchAny,
+                    )
+
+                    filter_by_doc_ids = Filter(
+                        must=[
+                            FieldCondition(key="doc_id", match=MatchAny(any=scope_vs))
+                        ]
+                    )
+
+                    _, vs_scores, vs_ids = self.vector_store.query(
+                        embedding=emb,
+                        top_k=top_k_first_round,
+                        **{**kwargs, **{"qdrant_filters": filter_by_doc_ids}},
+                    )
+                else:
+                    _, vs_scores, vs_ids = self.vector_store.query(
+                        embedding=emb, top_k=top_k_first_round, **kwargs
+                    )
                 if vs_ids:
                     vs_docs = self.doc_store.get(vs_ids)
 
