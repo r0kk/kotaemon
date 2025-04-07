@@ -25,6 +25,7 @@ from ktem.main import App  # noqa
 
 app = App()
 demo = app.make()
+
 demo.queue().launch(
     favicon_path=app._favicon,
     inbrowser=True,
@@ -33,5 +34,4 @@ demo.queue().launch(
         GRADIO_TEMP_DIR,
     ],
     share=KH_GRADIO_SHARE,
-    app_kwargs={"docs_url": "/docs"},
 )

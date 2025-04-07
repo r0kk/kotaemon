@@ -201,8 +201,10 @@ class VectorRetrieval(BaseRetrieval):
                 assert self.doc_store is not None
                 from llama_index.vector_stores.qdrant.base import QdrantVectorStore
 
-                if scope_vs is not None and isinstance(
-                    self.vector_store._client, QdrantVectorStore
+                if (
+                    scope_vs is not None
+                    and len(scope_vs) != 0
+                    and isinstance(self.vector_store._client, QdrantVectorStore)
                 ):
                     from qdrant_client.http.models import (
                         FieldCondition,

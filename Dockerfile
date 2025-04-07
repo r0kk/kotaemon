@@ -85,7 +85,7 @@ RUN --mount=type=ssh  \
 
 # install postgress drivers
 RUN apt-get update \
-    && apt-get install -y libpq-dev=15.10-0+deb12u1 gcc \
+    && apt-get install -y libpq-dev=15.12-0+deb12u2 gcc \
     && rm -rf /var/lib/apt/lists/* \
     && pip install "psycopg2==2.9.10"
 
