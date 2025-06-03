@@ -1,12 +1,13 @@
 import gradio as gr
 from decouple import config
+from theflow.settings import settings as flowsettings
+
 from ktem.app import BaseApp
 from ktem.pages.chat import ChatPage
 from ktem.pages.help import HelpPage
 from ktem.pages.resources import ResourcesTab
 from ktem.pages.settings import SettingsPage
 from ktem.pages.setup import SetupPage
-from theflow.settings import settings as flowsettings
 
 KH_DEMO_MODE = getattr(flowsettings, "KH_DEMO_MODE", False)
 KH_SSO_ENABLED = getattr(flowsettings, "KH_SSO_ENABLED", False)
@@ -92,15 +93,14 @@ class App(BaseApp):
                             setattr(self, f"_index_{index.id}", page)
 
             if not KH_DEMO_MODE:
-                if not KH_SSO_ENABLED:
-                    with gr.Tab(
-                        "Resources",
-                        elem_id="resources-tab",
-                        id="resources-tab",
-                        visible=not self.f_user_management,
-                        elem_classes=["fill-main-area-height", "scrollable"],
-                    ) as self._tabs["resources-tab"]:
-                        self.resources_page = ResourcesTab(self)
+                with gr.Tab(
+                    "Resources",
+                    elem_id="resources-tab",
+                    id="resources-tab",
+                    visible=not self.f_user_management,
+                    elem_classes=["fill-main-area-height", "scrollable"],
+                ) as self._tabs["resources-tab"]:
+                    self.resources_page = ResourcesTab(self)
 
                 with gr.Tab(
                     "Settings",

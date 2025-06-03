@@ -69,7 +69,6 @@ os.environ["HF_HUB_CACHE"] = str(KH_APP_DATA_DIR / "huggingface")
 KH_DOC_DIR = this_dir / "docs"
 
 KH_MODE = config("KH_MODE", default="dev")
-KH_SSO_ENABLED = config("KH_SSO_ENABLED", default=False, cast=bool)
 
 KH_FEATURE_CHAT_SUGGESTION = config(
     "KH_FEATURE_CHAT_SUGGESTION", default=False, cast=bool
@@ -417,3 +416,27 @@ log_levels = {
 }
 
 logging.basicConfig(level=log_levels.get(LOG_LEVEL, logging.WARNING))
+
+# Authentication settings
+GRADIO_SERVER_PORT = config("GRADIO_SERVER_PORT", default=False, cast=int)
+REQUIRED_ROLE = KH_DEPLOYMENT_NAME
+
+AUTHENTICATION_METHOD = config("AUTHENTICATION_METHOD", cast=str)
+if AUTHENTICATION_METHOD not in ["KEYCLOAK", "GRADIO_LOGIN"]:
+    raise ValueError(
+        f"Invalid AUTHENTICATION_METHOD: {AUTHENTICATION_METHOD}. "
+        "Must be one of 'KEYCLOAK' or 'GRADIO_LOGIN''."
+    )
+
+if AUTHENTICATION_METHOD == "KEYCLOAK":
+    KEYCLOAK_SERVER_URL = config("KEYCLOAK_SERVER_URL")
+    KEYCLOAK_REALM = config("KEYCLOAK_REALM")
+    KEYCLOAK_CLIENT_ID = config("KEYCLOAK_CLIENT_ID")
+    KEYCLOAK_CLIENT_SECRET = config("KEYCLOAK_CLIENT_SECRET")
+    KEYCLOAK_LOGOUT_URL = (
+        f"{KEYCLOAK_SERVER_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/logout"
+    )
+    KH_SSO_ENABLED = True
+    os.environ["KH_SSO_ENABLED"] = str(KH_SSO_ENABLED)  # type: ignore
+else:
+    KH_SSO_ENABLED = config("KH_SSO_ENABLED", default=False, cast=bool)
