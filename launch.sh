@@ -15,7 +15,7 @@ if [ "$KH_DEMO_MODE" = "true" ]; then
 else
     if [ "$KH_SSO_ENABLED" = "true" ]; then
         echo "KH_SSO_ENABLED is true. Launching in SSO mode..."
-        GR_FILE_ROOT_PATH="/app" KH_SSO_ENABLED=true uvicorn sso_app:app --host "$GRADIO_SERVER_NAME" --port "$GRADIO_SERVER_PORT"
+        GR_FILE_ROOT_PATH="/app" KH_SSO_ENABLED=true uvicorn main:app --host "$GRADIO_SERVER_NAME" --port "$GRADIO_SERVER_PORT"
     else
         ollama serve &
         python app.py
