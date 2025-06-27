@@ -119,6 +119,7 @@ class PDFThumbnailReader(PDFReader):
         for idx, doc in enumerate(documents):
             label = doc.metadata.get("page_label", str(idx))
             page_labels.append(label)
+            doc.metadata["page_index"] = idx
 
         # Get thumbnails using numeric indices
         page_indices = list(range(len(page_labels)))
@@ -132,10 +133,11 @@ class PDFThumbnailReader(PDFReader):
                     "image_origin": thumbnail,
                     "type": "thumbnail",
                     "page_label": label,
+                    "page_index": idx,
                     **(extra_info if extra_info else {}),
                 },
             )
-            for thumbnail, label in zip(page_thumbnails, page_labels)
+            for thumbnail, label, idx in zip(page_thumbnails, page_labels, page_indices)
         ]
 
         documents.extend(thumbnail_docs)

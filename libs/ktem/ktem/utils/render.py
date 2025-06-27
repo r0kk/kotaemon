@@ -84,11 +84,28 @@ class Render:
             return html_content
 
         is_pdf = doc.metadata.get("file_type", "") == "application/pdf"
-        page_idx = doc.metadata["page_label"]
 
         if not is_pdf:
             print("Document is not pdf")
             return html_content
+
+        # Try to get numeric page number for preview
+        page_label = doc.metadata.get("page_label", "1")
+        try:
+            page_idx = int(page_label)
+            show_preview = True
+        except (ValueError, TypeError):
+            # Non-numeric page label (string pages like "i", "ii", "preface")
+            # String pages load and search but don't show preview link
+            print(
+                f"Non-numeric page label '{page_label}' - preview disabled for string pages"
+            )
+            page_idx = 1  # Not used, but needed for compatibility
+            show_preview = False
+
+        if show_preview and page_idx < 0:
+            print("Fail to extract page number")
+            show_preview = False
 
         if not highlight_text:
             try:
@@ -111,11 +128,15 @@ class Render:
         else:
             phrase = "true"
 
+        # Only show preview link for numeric pages
+        if show_preview:
+            preview_link = f'<a href="#" class="pdf-link" data-src="{BASE_PATH}/file={pdf_path}" data-page="{page_idx}" data-search="{highlight_text}" data-phrase="{phrase}">[Preview]</a>'
+        else:
+            preview_link = ""
+
         return f"""
         {html_content}
-        <a href="#" class="pdf-link" data-src="{BASE_PATH}/file={pdf_path}" data-page="{page_idx}" data-search="{highlight_text}" data-phrase="{phrase}">
-            [Preview]
-        </a>
+        {preview_link}
         """  # noqa
 
     @staticmethod
