@@ -235,12 +235,14 @@ class ConversationControl(BasePage):
                     .order_by(
                         Conversation.is_public.desc(), Conversation.date_created.desc()
                     )  # type: ignore
+                    .limit(50)
                 )
             else:
                 statement = (
                     select(Conversation)
                     .where(Conversation.user == user_id)
                     .order_by(Conversation.date_created.desc())  # type: ignore
+                    .limit(50)
                 )
 
             results = session.exec(statement).all()
