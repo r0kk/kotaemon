@@ -18,16 +18,15 @@ tag_filter = "v?\\d+(\\.\\d+)*.*"
 [project]
 name = "kotaemon-app"
 dynamic = ["version"]
-requires-python = ">= 3.10"
+requires-python = ">=3.10,<3.13"
 description = "Kotaemon App"
 dependencies = [
     "kotaemon[all]",
     "ktem",
-    "elasticsearch>=8.17.0",
-    "unstructured[all-docs]>=0.16.20",
+    "elasticsearch>=8.17.0,<8.20",
+    "unstructured[all-docs]>=0.16.20,<0.17",
     "sentry-sdk>=2.21.0",
     "psycopg2>=2.9.10",
-    "graphrag<=0.3.6",
     "lightrag-hku<=0.0.8",
     "aioboto3>=15.1.0",
     "nano-vectordb>=0.0.4.3",
