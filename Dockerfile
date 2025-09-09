@@ -93,7 +93,7 @@ RUN apt-get update \
 ENV USE_LIGHTRAG=true
 RUN --mount=type=ssh  \
     --mount=type=cache,target=/root/.cache/pip  \
-    pip install aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
+    pip install aioboto3 nano-vectordb "ollama>=0.5.3,<0.6.0" xxhash "lightrag-hku<=0.0.8"
 
 RUN --mount=type=ssh  \
     --mount=type=cache,target=/root/.cache/pip  \

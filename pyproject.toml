@@ -15,13 +15,15 @@ python = ">=3.10,<3.12"
 # kotaemon = { path = "libs/kotaemon", develop = true, extras = ["all"] }
 # ktem = { path = "libs/ktem", develop = true }
 elasticsearch = "^8.17.0"
-lancedb = "^0.17.0"
-tantivy = "^0.22.0"
-numpy = "<2.0"
-lightrag = "^0.1.0b6"
+# tantivy = "^0.22.0"
 unstructured = {extras = ["all-docs"], version = "^0.16.20"}
 sentry-sdk = "^2.21.0"
 psycopg2 = "^2.9.10"
+graphrag = "<=0.3.6"
+lightrag-hku = "<=0.0.8"
+aioboto3 = "^15.1.0"
+nano-vectordb = "^0.0.4.3"
+pydantic = "<2.11"
 
 [build-system]
 requires = ["setuptools >= 61.0", "wheel", "setuptools-git-versioning>=2.0,<3"]
