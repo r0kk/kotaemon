@@ -1,0 +1,86 @@
+# Lite version
+FROM python:3.10-slim AS lite
+
+# Common dependencies
+RUN apt-get update -qqy && \
+    apt-get install -y --no-install-recommends \
+        ssh \
+        git \
+        gcc \
+        g++ \
+        poppler-utils \
+        libpoppler-dev \
+        unzip \
+        curl \
+        cargo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setup args
+ARG TARGETPLATFORM
+ARG TARGETARCH
+ENV TARGETARCH=${TARGETARCH}
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=UTF-8
+
+# Create working directory
+WORKDIR /app
+
+# Install uv (Astral package manager)
+RUN pip install --no-cache-dir uv
+
+# Copy dependency files first (for build cache)
+COPY pyproject.toml uv.lock ./
+
+# Optional: if local libs are included, copy their pyproject.toml for dependency resolution
+COPY libs/kotaemon/pyproject.toml libs/ktem/pyproject.toml ./libs/
+
+# Install dependencies using uv (lite set)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
+# Download pdfjs
+COPY scripts/download_pdfjs.sh /app/scripts/download_pdfjs.sh
+RUN chmod +x /app/scripts/download_pdfjs.sh
+ENV PDFJS_PREBUILT_DIR="/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist"
+RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
+
+# Copy application code
+COPY . /app
+COPY launch.sh /app/launch.sh
+COPY .env.example /app/.env
+
+# Clean up
+RUN apt-get autoremove -y && apt-get clean && rm -rf ~/.cache /var/lib/apt/lists/*
+
+ENTRYPOINT ["sh", "/app/launch.sh"]
+
+# ------------------------------
+# Full version
+# ------------------------------
+FROM lite AS full
+
+# Additional dependencies for full version
+RUN apt-get update -qqy && \
+    apt-get install -y --no-install-recommends \
+        tesseract-ocr \
+        tesseract-ocr-jpn \
+        libsm6 \
+        libxext6 \
+        libreoffice \
+        ffmpeg \
+        libmagic-dev \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Reinstall with "full" dependency group
+# Assuming your pyproject.toml defines [tool.uv.group.full]
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --group full
+
+# Clean up
+RUN apt-get autoremove -y && apt-get clean && rm -rf ~/.cache /var/lib/apt/lists/*
+
+ENTRYPOINT ["sh", "/app/launch.sh"]
