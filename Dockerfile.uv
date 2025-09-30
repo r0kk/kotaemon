@@ -13,6 +13,7 @@ RUN apt-get update -qqy && \
         unzip \
         curl \
         cargo \
+        libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup args
@@ -34,8 +35,8 @@ RUN pip install --no-cache-dir uv
 # Copy dependency files first (for build cache)
 COPY pyproject.toml uv.lock ./
 
-# Optional: if local libs are included, copy their pyproject.toml for dependency resolution
-COPY libs/kotaemon/pyproject.toml libs/ktem/pyproject.toml ./libs/
+# Copy workspace dependencies (needed for uv workspace resolution)
+COPY libs/ ./libs/
 
 # Install dependencies using uv (lite set)
 RUN --mount=type=cache,target=/root/.cache/uv \

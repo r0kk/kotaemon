@@ -12,12 +12,11 @@ unstructured = {extras = ["all-docs"], version = "^0.16.20"}
 sentry-sdk = "^2.21.0"
 psycopg2 = "^2.9.10"
 
-[tool.uv.group.full]
-dependencies = [
+[dependency-groups]
+full = [
   "torch >=2.7.0,<=2.8.0",
   "torchvision",
   "torchaudio",
-  "unstructured[all-docs] >=0.14.0,<=0.15.14",
   "psycopg2-binary >=2.8.0,<=2.9.10",
   "sentry-sdk >=2.34.0,<=2.35.1",
   "aioboto3",
