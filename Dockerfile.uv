@@ -56,7 +56,7 @@ COPY .env.example /app/.env
 # Clean up
 RUN apt-get autoremove -y && apt-get clean && rm -rf ~/.cache /var/lib/apt/lists/*
 
-ENTRYPOINT ["sh", "/app/launch.sh"]
+ENTRYPOINT ["uv", "run", "sh", "/app/launch.sh"]
 
 # ------------------------------
 # Full version
@@ -84,4 +84,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Clean up
 RUN apt-get autoremove -y && apt-get clean && rm -rf ~/.cache /var/lib/apt/lists/*
 
-ENTRYPOINT ["sh", "/app/launch.sh"]
+ENTRYPOINT ["uv", "run", "sh", "/app/launch.sh"]
