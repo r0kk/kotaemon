@@ -107,6 +107,9 @@ class Render:
             print("Fail to extract page number")
             show_preview = False
 
+        # Initialize phrase with default value
+        phrase = "false"
+
         if not highlight_text:
             try:
                 lang = detect(text.replace("\n", " "))["lang"]
